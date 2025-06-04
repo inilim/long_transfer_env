@@ -1,0 +1,11 @@
+# Exts
+/files/logs/**/*.log
+/files/db/**/*.sqlite
+
+# Dirs
+/vendor
+
+# Files
+/composer.lock
+.htaccess
+.phpunit.result.cache

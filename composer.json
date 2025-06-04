@@ -1,0 +1,44 @@
+{
+    "name": "inilim/long_transfer_env",
+    "description": "",
+    "type": "library",
+    "authors": [
+        {
+            "name": "inilim"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Inilim\\Long\\TransferEnv\\": "src/"
+        },
+        "files": []
+    },
+    "require": {
+        "php": ">=8.4",
+        "inilim/tools": "dev-main"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "inilim/dump": "dev-main"
+    },
+    "scripts": {
+        "unit": [
+            "php84 vendor/bin/phpunit"
+        ],
+        "unit-check": [
+            "php84 vendor/bin/phpunit tests"
+        ],
+        "stan": [
+            "php84 vendor/bin/phpstan"
+        ],
+        "stan-check": [
+            "php84 vendor/bin/phpstan analyze"
+        ]
+    },
+    "config": {
+        "platform": {
+            "php": "8.4"
+        }
+    }
+}
