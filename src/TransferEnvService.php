@@ -9,11 +9,21 @@ use Inilim\Long\TransferEnv\TransferEnvEnum;
 
 final class TransferEnvService
 {
+    const MAX_BITE_SIZE = 32_000;
+
     function encode(array $data): array
     {
+        if (!$this->checkMaxSizeData($data)) {
+            throw new \Exception('The data limit for transportation has been exceeded');
+        }
         return [
             TransferEnvEnum::MAIN->value => \json_encode($data),
         ];
+    }
+
+    function checkMaxSizeData(array $data): bool
+    {
+        return \strlen(\json_encode($data)) <= self::MAX_BITE_SIZE;
     }
 
     function decode(string $data): array
