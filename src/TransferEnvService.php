@@ -7,11 +7,11 @@ namespace Inilim\Long\TransferEnv;
 use Inilim\Tool\Obj;
 use Inilim\Tool\Str;
 use Inilim\Tool\Json;
-use Inilim\Long\TransferEnv\TransferEnvEnum;
 
 final class TransferEnvService
 {
     const MAX_BITE_SIZE = 32_000;
+    const MAIN_KEY = '__TRANSFER_ENV';
 
     protected int $decodedCount = 0;
 
@@ -21,7 +21,7 @@ final class TransferEnvService
             throw new \Exception('The data limit for transportation has been exceeded');
         }
         return [
-            TransferEnvEnum::MAIN->value => \json_encode($data),
+            self::MAIN_KEY => \json_encode($data),
         ];
     }
 
@@ -45,7 +45,7 @@ final class TransferEnvService
         if ($server === null) {
             $server = &$_SERVER;
         }
-        $key = TransferEnvEnum::MAIN->value;
+        $key = self::MAIN_KEY;
         $env = $server[$key] ?? null;
         if (!\is_string($env)) {
             throw Obj::sprintfException('$_SERVER["%s"] not found', [$key]);
