@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Inilim\Long\TransferEnv;
 
+use Inilim\Tool\Obj;
+use Inilim\Tool\Str;
 use Inilim\Tool\Json;
 use Inilim\Long\TransferEnv\TransferEnvEnum;
 
 final class TransferEnvService
 {
     const MAX_BITE_SIZE = 32_000;
+
+    protected int $decodedCount = 0;
 
     function encode(array $data): array
     {
@@ -26,23 +30,32 @@ final class TransferEnvService
         return \strlen(\json_encode($data)) <= self::MAX_BITE_SIZE;
     }
 
-    function decode(string $data): array
+    function getCountDecoded(): int
     {
-        if (!Json::isJsonAsArrOrObj($data)) {
-            throw new \InvalidArgumentException('not json');
-        }
-        return Json::decode($data, true);
+        return $this->decodedCount;
     }
 
-    function decodeFromServer(bool $clearFromServer = true): array
+    function hasBeenDecoded(): bool
     {
-        $key = TransferEnvEnum::MAIN->value;
-        $env = $_SERVER[$key] ?? null;
-        if (!\is_string($env) || !Json::isJsonAsArrOrObj($env)) {
-            throw new \InvalidArgumentException('$_SERVER key "__ENV" not found or not json');
+        return $this->decodedCount > 0;
+    }
+
+    function decodeFromServer(bool $clearFromServer = true, ?array &$server = null): array
+    {
+        if ($server === null) {
+            $server = &$_SERVER;
         }
+        $key = TransferEnvEnum::MAIN->value;
+        $env = $server[$key] ?? null;
+        if (!\is_string($env)) {
+            throw Obj::sprintfException('$_SERVER["%s"] not found', [$key]);
+        }
+        if (!Json::isJsonAsArrOrObj($env)) {
+            throw Obj::sprintfException('$_SERVER["%s"] not json ("%s")', [$key, Str::limit($env, 25)]);
+        }
+        $this->decodedCount++;
         if ($clearFromServer) {
-            unset($_SERVER[$key]);
+            unset($server[$key]);
         }
         $env = Json::decode($env, true);
         return $env;
