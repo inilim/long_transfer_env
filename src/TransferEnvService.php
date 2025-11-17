@@ -18,6 +18,10 @@ final class TransferEnvService
 
     protected int $decodedCount = 0;
 
+    /**
+     * @param mixed[] $data
+     * @return array<string,string>
+     */
     function encode(array $data): array
     {
         if (!$this->checkMaxSizeData($data)) {
@@ -28,6 +32,9 @@ final class TransferEnvService
         ];
     }
 
+    /**
+     * @param mixed[] $data
+     */
     function checkMaxSizeData(array $data): bool
     {
         return \strlen(\json_encode($data)) <= self::MAX_BITE_SIZE;
@@ -43,7 +50,11 @@ final class TransferEnvService
         return $this->decodedCount > 0;
     }
 
-    function decodeFromServer(bool $clearFromServer = true, ?array &$array = null): array
+    /** 
+     * @param mixed[] $array default $_SERVER
+     * @return mixed[]
+     */
+    function decodeFromArray(?array &$array = null, bool $clearAfterDecode = true): array
     {
         if ($array === null) {
             $array = &$_SERVER;
@@ -57,7 +68,7 @@ final class TransferEnvService
             throw Obj::sprintfException('$array["%s"] not json ("%s")', [$key, Str::limit($env, 25)]);
         }
         $this->decodedCount++;
-        if ($clearFromServer) {
+        if ($clearAfterDecode) {
             unset($array[$key]);
         }
         $env = Json::decode($env, true);
