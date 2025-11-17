@@ -8,6 +8,9 @@ use Inilim\Tool\Obj;
 use Inilim\Tool\Str;
 use Inilim\Tool\Json;
 
+/**
+ * @INFO ограничение для windows
+ */
 final class TransferEnvService
 {
     const MAX_BITE_SIZE = 32_000;
@@ -40,22 +43,22 @@ final class TransferEnvService
         return $this->decodedCount > 0;
     }
 
-    function decodeFromServer(bool $clearFromServer = true, ?array &$server = null): array
+    function decodeFromServer(bool $clearFromServer = true, ?array &$array = null): array
     {
-        if ($server === null) {
-            $server = &$_SERVER;
+        if ($array === null) {
+            $array = &$_SERVER;
         }
         $key = self::MAIN_KEY;
-        $env = $server[$key] ?? null;
+        $env = $array[$key] ?? null;
         if (!\is_string($env)) {
-            throw Obj::sprintfException('$_SERVER["%s"] not found', [$key]);
+            throw Obj::sprintfException('$array["%s"] not found or not string', [$key]);
         }
         if (!Json::isJsonAsArrOrObj($env)) {
-            throw Obj::sprintfException('$_SERVER["%s"] not json ("%s")', [$key, Str::limit($env, 25)]);
+            throw Obj::sprintfException('$array["%s"] not json ("%s")', [$key, Str::limit($env, 25)]);
         }
         $this->decodedCount++;
         if ($clearFromServer) {
-            unset($server[$key]);
+            unset($array[$key]);
         }
         $env = Json::decode($env, true);
         return $env;

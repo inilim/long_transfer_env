@@ -20,7 +20,6 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require-dev": {
-        "inilim/dump": "dev-main"
     },
     "scripts": {
         "unit": [
