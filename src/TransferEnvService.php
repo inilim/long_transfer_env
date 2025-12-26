@@ -22,7 +22,7 @@ final class TransferEnvService
     function encode(array $data): array
     {
         // @INFO у windows есть ограничение при передачи данных в env
-        if (\str_contains(\php_uname('s'), 'Windows') && !$this->checkMaxSizeData($data)) {
+        if (!$this->checkMaxSizeData($data)) {
             throw new \Exception('[Windows] The data limit for transportation has been exceeded');
         }
         return [
@@ -35,6 +35,9 @@ final class TransferEnvService
      */
     function checkMaxSizeData(array $data): bool
     {
+        if (!\str_contains(\php_uname('s'), 'Windows')) {
+            return true;
+        }
         return \strlen(\json_encode($data)) <= self::MAX_BITE_SIZE;
     }
 
