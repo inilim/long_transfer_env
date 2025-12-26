@@ -9,14 +9,11 @@ use Inilim\Tool\Str;
 use Inilim\Tool\Json;
 
 /**
- * @INFO ограничение для windows
  */
 final class TransferEnvService
 {
     const MAX_BITE_SIZE = 32_000;
     const MAIN_KEY = '__TRANSFER_ENV';
-
-    protected int $decodedCount = 0;
 
     /**
      * @param mixed[] $data
@@ -24,8 +21,9 @@ final class TransferEnvService
      */
     function encode(array $data): array
     {
-        if (!$this->checkMaxSizeData($data)) {
-            throw new \Exception('The data limit for transportation has been exceeded');
+        // @INFO у windows есть ограничение при передачи данных в env
+        if (\str_contains(\php_uname('s'), 'Windows') && !$this->checkMaxSizeData($data)) {
+            throw new \Exception('[Windows] The data limit for transportation has been exceeded');
         }
         return [
             self::MAIN_KEY => \json_encode($data),
@@ -38,16 +36,6 @@ final class TransferEnvService
     function checkMaxSizeData(array $data): bool
     {
         return \strlen(\json_encode($data)) <= self::MAX_BITE_SIZE;
-    }
-
-    function getCountDecoded(): int
-    {
-        return $this->decodedCount;
-    }
-
-    function hasBeenDecoded(): bool
-    {
-        return $this->decodedCount > 0;
     }
 
     /** 
@@ -67,7 +55,6 @@ final class TransferEnvService
         if (!Json::isJsonAsArrOrObj($env)) {
             throw Obj::sprintfException('$array["%s"] not json ("%s")', [$key, Str::limit($env, 25)]);
         }
-        $this->decodedCount++;
         if ($clearAfterDecode) {
             unset($array[$key]);
         }
