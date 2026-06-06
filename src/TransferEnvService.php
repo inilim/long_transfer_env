@@ -7,6 +7,7 @@ namespace Inilim\Long\TransferEnv;
 use Inilim\Tool\Obj;
 use Inilim\Tool\Str;
 use Inilim\Tool\Json;
+use Inilim\Tool\PF;
 
 /**
  */
@@ -16,17 +17,25 @@ final class TransferEnvService
     const MAIN_KEY = '__TRANSFER_ENV';
 
     /**
-     * @param mixed[] $data
      * @return array<string,string>
      */
-    function encode(array $data): array
+    function encode(mixed $data): array
     {
-        // @INFO у windows есть ограничение при передачи данных в env
-        if (!$this->checkMaxSizeData($data)) {
-            throw new \Exception('[Windows] The data limit for transportation has been exceeded');
+        $endata = null;
+        // @INFO у windows есть ограничение при передачи данных в env proc_open
+        if ('\\' !== \DIRECTORY_SEPARATOR) {
+            $len = \strlen($endata = \json_encode($data));
+
+            if ($len > self::MAX_BITE_SIZE) {
+                throw new \InvalidArgumentException(\sprintf('The environment block size (%d) exceeds the Windows limit of %d UTF-16 code units.', $len, self::MAX_BITE_SIZE));
+                // throw new \Exception('[Windows] The data limit for transportation has been exceeded');
+            }
         }
+
+        /** @var null|string $endata */
+
         return [
-            self::MAIN_KEY => \json_encode($data),
+            self::MAIN_KEY => ($endata ?? \json_encode($data)),
         ];
     }
 
@@ -35,7 +44,7 @@ final class TransferEnvService
      */
     function checkMaxSizeData(array $data): bool
     {
-        if (!\str_contains(\php_uname('s'), 'Windows')) {
+        if ('\\' !== \DIRECTORY_SEPARATOR) {
             return true;
         }
         return \strlen(\json_encode($data)) <= self::MAX_BITE_SIZE;
@@ -43,9 +52,8 @@ final class TransferEnvService
 
     /** 
      * @param mixed[] $array default $_SERVER
-     * @return mixed[]
      */
-    function decodeFromArray(?array &$array = null, bool $clearAfterDecode = true): array
+    function decodeFromArray(?array &$array = null, bool $clearAfterDecode = true): mixed
     {
         if ($array === null) {
             $array = &$_SERVER;
@@ -55,7 +63,7 @@ final class TransferEnvService
         if (!\is_string($env)) {
             throw Obj::sprintfException('$array["%s"] not found or not string', [$key]);
         }
-        if (!Json::isJsonAsArrOrObj($env)) {
+        if (!PF::json_validate($env)) {
             throw Obj::sprintfException('$array["%s"] not json ("%s")', [$key, Str::limit($env, 25)]);
         }
         if ($clearAfterDecode) {

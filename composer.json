@@ -15,12 +15,9 @@
     },
     "require": {
         "php": ">=8.4",
-        "inilim/tools": "dev-main"
+        "inilim/tools": "^0.0.04062026"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require-dev": {
-    },
+    "require-dev": {},
     "scripts": {
         "unit": [
             "php84 vendor/bin/phpunit"
